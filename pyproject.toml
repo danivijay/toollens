@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "toollens"
+version = "0.1.0"
+description = "Find out which MCP tools your agents confuse, before your users do."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Dani Vijay" }]
+keywords = ["mcp", "model-context-protocol", "llm", "agents", "evaluation", "tool-calling"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "mcp>=2.0",
+    "pydantic>=2.6",
+    "jsonschema>=4.20",
+    "httpx>=0.27",
+    "click>=8.1",
+    "rich>=13.7",
+    "anyio>=4.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+toollens = "toollens.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/toollens"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["integration: spawns real MCP servers over stdio"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]  # the formatter owns line length; long strings stay readable

@@ -1,0 +1,279 @@
+{
+  "server": "python3 examples/servers/workspace_v1.py",
+  "server_name": "workspace-v1",
+  "protocol_version": "2026-07-28",
+  "tools": [
+    {
+      "name": "list_events",
+      "description": "Get events.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "title": "End Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "list_eventsArguments"
+      }
+    },
+    {
+      "name": "search_events",
+      "description": "Search events.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_eventsArguments"
+      }
+    },
+    {
+      "name": "get_event",
+      "description": "Get an event.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "get_eventArguments"
+      }
+    },
+    {
+      "name": "create_event",
+      "description": "Create a new event on the calendar.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          },
+          "duration_minutes": {
+            "default": 30,
+            "title": "Duration Minutes",
+            "type": "integer"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attendees"
+          }
+        },
+        "required": [
+          "title",
+          "start"
+        ],
+        "title": "create_eventArguments"
+      }
+    },
+    {
+      "name": "update_event",
+      "description": "Update an event.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Minutes"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "update_eventArguments"
+      }
+    },
+    {
+      "name": "cancel_event",
+      "description": "Set event status.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "notify_attendees": {
+            "default": true,
+            "title": "Notify Attendees",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "cancel_eventArguments"
+      }
+    },
+    {
+      "name": "find_free_slots",
+      "description": "Check calendar availability for events.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Attendees",
+            "type": "array"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "duration_minutes": {
+            "default": 30,
+            "title": "Duration Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attendees",
+          "date"
+        ],
+        "title": "find_free_slotsArguments"
+      }
+    },
+    {
+      "name": "invite_attendees",
+      "description": "Add people to an event.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "emails": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Emails",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "emails"
+        ],
+        "title": "invite_attendeesArguments"
+      }
+    },
+    {
+      "name": "find_contact",
+      "description": "Search people.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "find_contactArguments"
+      }
+    },
+    {
+      "name": "book_room",
+      "description": "Book for an event.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_id",
+          "capacity"
+        ],
+        "title": "book_roomArguments"
+      }
+    }
+  ]
+}

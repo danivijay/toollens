@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check src tests examples
+      - run: ruff format --check src tests examples
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]" pytest-cov
+      - name: Unit and integration tests
+        run: pytest --cov=toollens --cov-report=term-missing
+
+  demo:
+    # Dogfood: the README's headline claim must keep holding.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - run: toollens validate -s "python examples/servers/workspace_v2.py" -t examples/datasets/workspace.jsonl --min-per-tool 8
+      - run: toollens run -s "python examples/servers/workspace_v2.py" -t examples/datasets/workspace.jsonl --no-matrix --fail-under 0.45 --html report.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toollens-report
+          path: report.html

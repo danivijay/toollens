@@ -1,0 +1,302 @@
+{
+  "server": "python3 examples/servers/workspace_v2.py",
+  "server_name": "workspace-v2",
+  "protocol_version": "2026-07-28",
+  "tools": [
+    {
+      "name": "list_events",
+      "description": "List every calendar event between two dates, e.g. 'what's on my calendar this week', 'my schedule tomorrow', 'meetings on Friday'. Use when the user gives a day or date range, not keywords. Not for keyword lookup (use search_events) or open time (use find_free_slots).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "description": "Calendar date, YYYY-MM-DD.",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "description": "Calendar date, YYYY-MM-DD.",
+            "title": "End Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "list_eventsArguments"
+      }
+    },
+    {
+      "name": "search_events",
+      "description": "Find events by keyword in the title or topic, e.g. 'when is the billing design review', 'find the offsite meeting'. Use when the user names a topic but not a date. Not for listing a day's schedule (use list_events) or details of a known event id (use get_event).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Words that appear in the event title, e.g. 'design review'.",
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "description": "Maximum events to return.",
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_eventsArguments"
+      }
+    },
+    {
+      "name": "get_event",
+      "description": "Fetch full details (time, attendees, room, status) of ONE event when its id like evt_1040 is known. Not for finding events by keyword (use search_events) or by date (use list_events).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "description": "Event id such as 'evt_1040'.",
+            "title": "Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "get_eventArguments"
+      }
+    },
+    {
+      "name": "create_event",
+      "description": "Schedule a brand-new meeting at a chosen time, optionally inviting people. Not for moving or renaming an existing event (use update_event).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "Meeting title.",
+            "title": "Title",
+            "type": "string"
+          },
+          "start": {
+            "description": "Start time, ISO 8601 local, e.g. 2026-10-14T15:00.",
+            "title": "Start",
+            "type": "string"
+          },
+          "duration_minutes": {
+            "default": 30,
+            "description": "Length in minutes.",
+            "title": "Duration Minutes",
+            "type": "integer"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Attendee email addresses.",
+            "title": "Attendees"
+          }
+        },
+        "required": [
+          "title",
+          "start"
+        ],
+        "title": "create_eventArguments"
+      }
+    },
+    {
+      "name": "update_event",
+      "description": "Change an existing event: reschedule or move it to a new time, rename it, or make it longer or shorter. Not for cancelling (use cancel_event) or adding people (use invite_attendees).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "description": "Event id such as 'evt_1040'.",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New title.",
+            "title": "Title"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New start time, ISO 8601 local.",
+            "title": "Start"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New length in minutes.",
+            "title": "Duration Minutes"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "update_eventArguments"
+      }
+    },
+    {
+      "name": "cancel_event",
+      "description": "Cancel, call off or delete a meeting so it no longer happens; attendees are told by default. Not for moving it to another time (use update_event).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "description": "Event id such as 'evt_1040'.",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "notify_attendees": {
+            "default": true,
+            "description": "Email attendees about the cancellation.",
+            "title": "Notify Attendees",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "cancel_eventArguments"
+      }
+    },
+    {
+      "name": "find_free_slots",
+      "description": "Find open time when everyone given is free on a date: 'when are Priya and I both free', 'find a 30-minute gap with Lena on Thursday'. Use before create_event. Not for listing booked events (use list_events).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "description": "Email addresses of everyone who must be free.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Attendees",
+            "type": "array"
+          },
+          "date": {
+            "description": "Calendar date, YYYY-MM-DD.",
+            "title": "Date",
+            "type": "string"
+          },
+          "duration_minutes": {
+            "default": 30,
+            "description": "Length of the free gap needed, in minutes.",
+            "title": "Duration Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attendees",
+          "date"
+        ],
+        "title": "find_free_slotsArguments"
+      }
+    },
+    {
+      "name": "invite_attendees",
+      "description": "Add guests to a meeting that already exists and send them the invite. Not for scheduling a new meeting (use create_event).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "description": "Event id such as 'evt_1040'.",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "emails": {
+            "description": "Email addresses to add.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Emails",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "emails"
+        ],
+        "title": "invite_attendeesArguments"
+      }
+    },
+    {
+      "name": "find_contact",
+      "description": "Look up a colleague in the company directory by name to get their email address. Not for searching meetings (use search_events).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Full or partial person name, e.g. 'Lena'.",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "find_contactArguments"
+      }
+    },
+    {
+      "name": "book_room",
+      "description": "Reserve a physical meeting room (conference room) for an existing event, sized to headcount.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "description": "Event id such as 'evt_1040'.",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "capacity": {
+            "description": "Number of people the room must seat.",
+            "title": "Capacity",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_id",
+          "capacity"
+        ],
+        "title": "book_roomArguments"
+      }
+    }
+  ]
+}

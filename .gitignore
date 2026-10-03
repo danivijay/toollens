@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+runs/
+*.html
+!docs/sample-report.html
+.DS_Store
+
+# Personal productivity files
+TASKS.md
+CLAUDE.md
+memory/
+dashboard.html
