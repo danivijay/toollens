@@ -53,6 +53,28 @@ def test_look_alikes_are_flagged_and_disambiguation_lowers_risk():
     )
 
 
+def test_disambiguation_needs_a_whole_word_reference():
+    # 'research' contains 'search' and 'get_event_list' contains 'get_event', but neither names the sibling
+    search = ToolSpec(name="search", description="Search the web for pages about a topic and return links.")
+    fetch = ToolSpec(
+        name="fetch", description="Fetch the pages for research on a topic and return their text."
+    )
+    get = ToolSpec(name="get_event", description="Get one calendar event and its details by id.")
+    get_v2 = ToolSpec(
+        name="get_events_v2", description="Get calendar events and details; replaces get_event_list."
+    )
+    assert not similar_pairs([search, fetch])[0].disambiguated
+    assert not similar_pairs([get, get_v2])[0].disambiguated
+
+    # real references still count, by identifier or in plain words, at any position or case
+    fetch2 = fetch.model_copy(update={"description": "Fetch one page. Use search first to find URLs."})
+    get_v3 = get_v2.model_copy(
+        update={"description": "Get events in a range. For a single one, use Get Event."}
+    )
+    assert similar_pairs([search, fetch2])[0].disambiguated
+    assert similar_pairs([get, get_v3])[0].disambiguated
+
+
 def test_large_definitions_are_noted():
     props = {f"p{i}": {"type": "string", "description": "x" * 60} for i in range(40)}
     big = ToolSpec(

@@ -90,9 +90,12 @@ def tool_definition_text(tool: ToolSpec) -> str:
 
 
 def _mentions(text: str, other: ToolSpec) -> bool:
-    if other.name in text:
-        return True
-    return " ".join(split_identifier(other.name)) in text.lower()
+    """Does `text` refer to `other` by name? Whole words only, so 'research' never counts as 'search'."""
+
+    def whole(needle: str, haystack: str) -> bool:
+        return bool(needle) and re.search(rf"(?<![\w-]){re.escape(needle)}(?![\w-])", haystack) is not None
+
+    return whole(other.name, text) or whole(" ".join(split_identifier(other.name)), text.lower())
 
 
 def similar_pairs(tools: list[ToolSpec]) -> list[SimilarPair]:

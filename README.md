@@ -256,7 +256,7 @@ The design choices that matter:
 
 ```bash
 pip install -e ".[dev]" pytest-cov
-pytest --cov=toollens          # 87 tests, ~97% line coverage, ~10 s
+pytest --cov=toollens          # 88 tests, ~97% line coverage, ~10 s
 pytest -m "not integration"    # skip the tests that spawn real servers
 ```
 
@@ -279,7 +279,7 @@ src/toollens/        library and CLI
 examples/servers/    workspace_v1.py (terse) · workspace_v2.py (rewritten) · shared in-memory backend
 examples/datasets/   workspace.jsonl: 112 labelled tasks (direct, near-miss, no-tool)
 examples/snapshots/  tool snapshots for offline runs
-tests/               87 tests (unit, contract and integration)
+tests/               88 tests (unit, contract and integration)
 docs/                sample report and images
 ```
 
