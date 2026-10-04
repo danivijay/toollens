@@ -29,6 +29,11 @@ dependencies = [
     "anyio>=4.3",
 ]
 
+[project.urls]
+Homepage = "https://github.com/danivijay/toollens"
+Source = "https://github.com/danivijay/toollens"
+Issues = "https://github.com/danivijay/toollens/issues"
+
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5"]
 
