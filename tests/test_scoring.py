@@ -26,6 +26,10 @@ from toollens.scoring import args_contain, score, summarize
         ({"filter": {"status": "open"}}, {"filter": {"status": "Open", "x": 1}}, True),
         ({"notify": False}, {"notify": False}, True),
         ({"notify": False}, {"notify": True}, False),
+        ({"notify": True}, {"notify": 1}, False),  # booleans never match numbers
+        ({"limit": 1}, {"limit": True}, False),
+        ({"limit": 0}, {"limit": False}, False),
+        ({"notify": "true"}, {"notify": True}, False),
     ],
 )
 def test_args_contain(expected, actual, ok):

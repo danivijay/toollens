@@ -40,6 +40,9 @@ def _value_matches(expected: Any, actual: Any) -> bool:
         return all(any(_value_matches(e, a) for a in actual) for e in expected)
     if isinstance(expected, dict):
         return isinstance(actual, dict) and args_contain(expected, actual)
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        # bool is a subclass of int in Python, so True == 1 would otherwise count as a match
+        return type(expected) is type(actual) and expected == actual
     e, a = _norm(expected), _norm(actual)
     if isinstance(e, str) and isinstance(a, str):
         if e == a:
