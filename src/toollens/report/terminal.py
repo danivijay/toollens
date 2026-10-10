@@ -19,6 +19,12 @@ def pct(x: float | None) -> str:
     return "n/a" if x is None else f"{x * 100:.0f}%"
 
 
+def _acc_cell(x: float, ci: tuple[float, float] | None) -> str:
+    if ci is None:
+        return pct(x)
+    return f"{pct(x)} ({ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
+
+
 def _acc_style(x: float | None) -> str:
     if x is None:
         return "dim"
@@ -71,7 +77,7 @@ def scoreboard(runs: list[Run]) -> Table:
             mt = m.metrics
             k = mt.accuracy_by_kind
             row = [
-                Text(pct(mt.accuracy), style=_acc_style(mt.accuracy)),
+                Text(_acc_cell(mt.accuracy, mt.accuracy_ci), style=_acc_style(mt.accuracy)),
                 pct(k.get("direct")),
                 pct(k.get("near_miss")),
                 pct(mt.abstention_recall),

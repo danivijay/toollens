@@ -1,7 +1,7 @@
 import pytest
 
 from toollens.models import ERROR, NO_TOOL, Prediction
-from toollens.scoring import args_contain, score, summarize
+from toollens.scoring import args_contain, score, summarize, wilson_interval
 
 
 @pytest.mark.parametrize(
@@ -110,3 +110,29 @@ def test_routers_get_na_for_arguments(tiny_snapshot, tiny_tasks):
     results = score(tiny_snapshot, tiny_tasks, p, produces_arguments=False)
     m = summarize("router", tiny_snapshot, results)
     assert m.accuracy == 1.0 and m.args_valid_rate is None and m.args_match_rate is None
+
+
+@pytest.mark.parametrize(
+    "successes, n, low, high",
+    [
+        (50, 100, 0.4038, 0.5962),  # p = 0.5 at n = 100, a standard textbook value
+        (0, 10, 0.0, 0.2775),  # never collapses to a zero-width interval
+        (10, 10, 0.7225, 1.0),
+    ],
+)
+def test_wilson_interval(successes, n, low, high):
+    got = wilson_interval(successes, n)
+    assert got == pytest.approx((low, high), abs=1e-3)
+
+
+def test_wilson_interval_empty_and_contains_the_point_estimate():
+    assert wilson_interval(0, 0) is None
+    low, high = wilson_interval(49, 112)
+    assert low < 49 / 112 < high
+
+
+def test_summarize_reports_accuracy_interval(tiny_snapshot, tiny_tasks):
+    results = score(tiny_snapshot, tiny_tasks, preds(**{t.id: t.expected_tool for t in tiny_tasks}))
+    metrics = summarize("m", tiny_snapshot, results)
+    correct = sum(r.tool_correct for r in results)
+    assert metrics.accuracy_ci == pytest.approx(wilson_interval(correct, metrics.n))

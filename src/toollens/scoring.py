@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from collections import Counter, defaultdict
 from typing import Any
@@ -140,6 +141,8 @@ class Metrics(BaseModel):
     model: str
     n: int
     accuracy: float
+    accuracy_ci: tuple[float, float] | None = None
+    """95% Wilson interval around `accuracy`. Wide on small suites, so compare runs against it."""
     accuracy_by_kind: dict[str, float]
     count_by_kind: dict[str, int]
     abstention_precision: float | None
@@ -162,6 +165,22 @@ class Metrics(BaseModel):
 
 def _rate(values: list[bool]) -> float | None:
     return sum(values) / len(values) if values else None
+
+
+def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, float] | None:
+    """Wilson score interval for a proportion (95% by default).
+
+    Unlike the normal approximation it stays inside [0, 1] and behaves sensibly for small n and for
+    rates near 0 or 1, which is where tool-accuracy numbers on a fixed task set usually sit.
+    """
+    if n == 0:
+        return None
+    p = successes / n
+    z2 = z * z
+    denom = 1 + z2 / n
+    centre = (p + z2 / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z2 / (4 * n * n)) / denom
+    return max(0.0, centre - half), min(1.0, centre + half)
 
 
 def summarize(model: str, snapshot: ServerSnapshot, results: list[TaskResult]) -> Metrics:
@@ -214,6 +233,7 @@ def summarize(model: str, snapshot: ServerSnapshot, results: list[TaskResult]) -
         model=model,
         n=n,
         accuracy=sum(r.tool_correct for r in results) / n if n else 0.0,
+        accuracy_ci=wilson_interval(sum(r.tool_correct for r in results), n),
         accuracy_by_kind={k: sum(v) / len(v) for k, v in sorted(by_kind.items())},
         count_by_kind={k: len(v) for k, v in sorted(by_kind.items())},
         abstention_precision=_rate([r.task.expected_tool is None for r in abstained]),
