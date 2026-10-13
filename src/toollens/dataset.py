@@ -48,6 +48,7 @@ def check_tasks(snapshot: ServerSnapshot, tasks: list[Task], min_per_tool: int =
             elif snapshot.tool(t.distractor) is None:
                 problems.append(f"{t.id}: distractor {t.distractor!r} is not a tool on this server")
         # Leakage: a prompt that names the expected tool verbatim measures string matching, not understanding.
-        if re.search(rf"\b{re.escape(spec.name)}\b", t.prompt):
+        # Case doesn't make it any less of a giveaway ("Use GET_WEATHER" still names the tool).
+        if re.search(rf"\b{re.escape(spec.name)}\b", t.prompt, re.IGNORECASE):
             problems.append(f"{t.id}: prompt names its own expected tool {spec.name!r} (label leakage)")
     return problems

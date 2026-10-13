@@ -51,3 +51,10 @@ def test_check_tasks_catches_problems(tiny_snapshot):
         "'convert_currency' has 0 tasks",
     ]:
         assert fragment in text, fragment
+
+
+def test_label_leakage_ignores_case(tiny_snapshot):
+    leaky = Task(id="x", prompt="Please run GET_WEATHER for Pune", expected_tool="get_weather")
+    assert any("label leakage" in p for p in check_tasks(tiny_snapshot, [leaky]))
+    clean = Task(id="y", prompt="Is it raining in Pune right now?", expected_tool="get_weather")
+    assert not any("label leakage" in p for p in check_tasks(tiny_snapshot, [clean]))
