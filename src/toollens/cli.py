@@ -61,6 +61,13 @@ def _provider(spec: str) -> str:
     return spec.partition(":")[0]
 
 
+def _overlap(a, b) -> bool:
+    """True when two runs' accuracy intervals overlap, i.e. the difference may just be sampling noise."""
+    if a.accuracy_ci is None or b.accuracy_ci is None:
+        return False  # runs saved before intervals existed: say nothing rather than guess
+    return a.accuracy_ci[0] <= b.accuracy_ci[1] and b.accuracy_ci[0] <= a.accuracy_ci[1]
+
+
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option(__version__, prog_name="toollens")
 def main() -> None:
@@ -296,15 +303,21 @@ def report(runs, html_path, no_matrix):
         for other in loaded[1:]:
             for m in other.models:
                 try:
-                    before = base.model(m.model).metrics.accuracy
+                    prev = base.model(m.model).metrics
                 except KeyError:
                     continue
+                before = prev.accuracy
                 delta = m.metrics.accuracy - before
                 style = "green" if delta > 0 else "red" if delta < 0 else "dim"
+                noise = (
+                    " [dim](within noise: 95% intervals overlap)[/]"
+                    if delta and _overlap(prev, m.metrics)
+                    else ""
+                )
                 console.print(
                     f"[cyan]{m.model}[/]: {before:.0%} → {m.metrics.accuracy:.0%} "
                     f"([{style}]{delta * 100:+.0f} pts[/]) "
-                    f"{base.snapshot.server_name} → {other.snapshot.server_name}"
+                    f"{base.snapshot.server_name} → {other.snapshot.server_name}{noise}"
                 )
     if html_path:
         write_html(loaded, html_path)

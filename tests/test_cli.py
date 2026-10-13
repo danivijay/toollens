@@ -119,3 +119,13 @@ def test_server_without_tools_warns(tmp_path):
     snap.write_text('{"server": "x", "tools": []}')
     res = CliRunner().invoke(main, ["inspect", "--tools", str(snap)])
     assert res.exit_code == 0 and "no tools" in res.output
+
+
+def test_compare_flags_deltas_inside_the_intervals():
+    from types import SimpleNamespace as NS
+
+    from toollens.cli import _overlap
+
+    assert _overlap(NS(accuracy_ci=(0.40, 0.60)), NS(accuracy_ci=(0.55, 0.75)))
+    assert not _overlap(NS(accuracy_ci=(0.20, 0.33)), NS(accuracy_ci=(0.40, 0.58)))
+    assert not _overlap(NS(accuracy_ci=None), NS(accuracy_ci=(0.4, 0.6)))  # older runs: stay quiet
