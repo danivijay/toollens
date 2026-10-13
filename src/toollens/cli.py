@@ -187,7 +187,9 @@ def generate(
 @click.option("--out", "-o", "out_dir", default="runs", show_default=True, type=click.Path(file_okay=False))
 @click.option("--html", "html_path", type=click.Path(dir_okay=False), help="Also write an HTML report here.")
 @click.option(
-    "--fail-under", type=float, help="Exit 1 if any model's tool accuracy is below this (0-1). For CI."
+    "--fail-under",
+    type=click.FloatRange(0, 1),
+    help="Exit 1 if any model's tool accuracy is below this (0-1). For CI.",
 )
 @click.option("--no-matrix", is_flag=True, help="Skip confusion matrices in terminal output.")
 def run(

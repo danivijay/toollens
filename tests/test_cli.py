@@ -77,6 +77,14 @@ def test_run_report_compare_and_fail_under(tmp_path):
     assert res.exit_code == 0 and "workspace-v1 → workspace-v2" in res.output and "pts" in res.output
 
 
+def test_fail_under_must_be_a_fraction(tmp_path):
+    # 45 almost always means "45%"; accepting it would fail every run with a confusing message
+    res = CliRunner().invoke(
+        main, ["run", "--tools", V1, "-t", TASKS, "-o", str(tmp_path), "--fail-under", "45"]
+    )
+    assert res.exit_code == 2 and "--fail-under" in res.output
+
+
 def test_run_rejects_bad_model_spec(tmp_path):
     res = CliRunner().invoke(main, ["run", "--tools", V1, "-t", TASKS, "-m", "nonsense", "-o", str(tmp_path)])
     assert res.exit_code == 2 and "provider:model" in res.output
